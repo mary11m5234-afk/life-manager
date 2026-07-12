@@ -4,10 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>مدير الحياة v3.0 - Life Manager</title>
+    <!-- Tailwind CSS -->
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <!-- Google Fonts (Cairo) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+    <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         body { font-family: 'Cairo', sans-serif; transition: all 0.3s ease; }
@@ -20,6 +23,7 @@
 </head>
 <body class="bg-gray-50 text-gray-800" id="app-body">
 
+    <!-- الهيدر الرئيسي مع زر تغيير اللغة -->
     <header class="bg-indigo-900 text-white shadow-lg py-6 px-4 text-center relative overflow-hidden">
         <div class="absolute inset-0 bg-gradient-to-r from-purple-800 to-indigo-900 opacity-50"></div>
         <div class="absolute top-4 left-4 z-20">
@@ -34,6 +38,7 @@
         </div>
     </header>
 
+    <!-- نظام التبويب (Tabs Navigation) -->
     <div class="max-w-7xl mx-auto px-4 mt-6">
         <div class="flex flex-wrap justify-center gap-2 bg-white p-2 rounded-2xl shadow-sm border border-gray-100">
             <button onclick="switchTab('todo')" id="btn-todo" class="tab-btn px-4 py-2 rounded-xl font-bold transition-all bg-indigo-600 text-white shadow-md">📝 <span id="lbl-tab-todo">المهام</span></button>
@@ -46,8 +51,10 @@
         </div>
     </div>
 
+    <!-- المحتوى الرئيسي -->
     <main class="max-w-7xl mx-auto px-4 py-6 mb-12">
 
+        <!-- 0. قسم المهام اليومية -->
         <section id="tab-todo" class="tab-content block space-y-6">
             <div class="bg-indigo-50 border border-indigo-200 p-5 rounded-2xl">
                 <h3 id="txt-todo-title" class="font-bold text-indigo-900 text-lg mb-2">📋 قائمة المهام اليومية</h3>
@@ -61,6 +68,7 @@
             </div>
         </section>
 
+        <!-- 1. قسم الأهداف -->
         <section id="tab-goals" class="tab-content hidden space-y-6">
             <div class="bg-purple-50 border border-purple-200 p-4 rounded-2xl">
                 <h3 id="txt-vision-title" class="font-bold text-purple-900 mb-2">💡 خلية الرؤية (3 سنوات):</h3>
@@ -95,6 +103,7 @@
             </div>
         </section>
 
+        <!-- 2. قسم العادات اليومية -->
         <section id="tab-habits" class="tab-content hidden space-y-6">
             <div class="bg-blue-50 border border-blue-200 p-4 rounded-2xl">
                 <h3 id="txt-habits-title" class="font-bold text-blue-900 mb-2">🔄 متتبع الإنجاز اليومي للعادات</h3>
@@ -119,9 +128,16 @@
             </div>
         </section>
 
+        <!-- 3. قسم المدخرات والمنحنى البياني -->
         <section id="tab-savings" class="tab-content hidden space-y-6">
             <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-                <div id="txt-savings-header" class="p-4 bg-emerald-700 text-white font-bold">تحديث ميزانية الشهر الحالي 💰</div>
+                <div class="p-4 bg-emerald-700 text-white font-bold flex justify-between items-center">
+                    <span id="txt-savings-header">تحديث ميزانية الشهر الحالي 💰</span>
+                    <!-- قائمة العملات الذكية داخل تبويب المدخرات -->
+                    <select id="savings-currency-select" onchange="calculateSavings()" class="bg-emerald-800 text-white font-bold text-xs rounded-xl px-3 py-1.5 border border-emerald-600 focus:outline-none cursor-pointer">
+                        <!-- العناصر تتولد برمجياً باللغتين -->
+                    </select>
+                </div>
                 <div class="p-4 grid grid-cols-1 md:grid-cols-3 gap-4 bg-gray-50">
                     <div>
                         <label id="lbl-inc" class="block text-xs text-gray-500 font-bold mb-1">الراتب / الدخل:</label>
@@ -155,15 +171,14 @@
             </div>
         </section>
 
+        <!-- 4. قسم الرصيد -->
         <section id="tab-balance" class="tab-content hidden space-y-6">
             <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
                 <div class="p-4 bg-slate-900 text-white font-bold flex justify-between items-center">
                     <span id="txt-bal-header">تتبع أرصدة الحسابات الأسبوعية 💳</span>
+                    <!-- قائمة العملات الذكية داخل تبويب الرصيد -->
                     <select id="currency-select" onchange="calculateTotalBalance()" class="bg-slate-800 text-white font-bold text-xs rounded-xl px-3 py-1.5 border border-slate-700 focus:outline-none cursor-pointer">
-                        <option value="د.ج">دينار جزائري (د.ج)</option>
-                        <option value="ر.س" selected>ريال سعودي (ر.س)</option>
-                        <option value="$">دولار ($)</option>
-                        <option value="€">يورو (€)</option>
+                        <!-- العناصر تتولد برمجياً باللغتين -->
                     </select>
                 </div>
                 <div class="p-4 grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -175,6 +190,7 @@
             </div>
         </section>
 
+        <!-- 5. قسم التقويم الجديد كلياً -->
         <section id="tab-calendar" class="tab-content hidden relative">
             <div class="bg-slate-900 text-gray-100 p-4 rounded-t-3xl flex justify-between items-center border-b border-slate-800">
                 <div class="flex items-center gap-2">
@@ -211,6 +227,7 @@
             </div>
         </section>
 
+        <!-- 6. قسم الامتنان -->
         <section id="tab-gratitude" class="tab-content hidden space-y-6">
             <div class="bg-fuchsia-50 border border-fuchsia-200 p-4 rounded-2xl">
                 <h3 id="txt-grat-title" class="font-bold text-fuchsia-900 mb-1">🙏 اكتبِ مَشاعرك الإيجابية لهذا الأسبوع</h3>
@@ -234,8 +251,14 @@
                 habitsTitle: "🔄 متتبع الإنجاز اليومي للعادات", habitPlh: "اكتبي العادة اليومية الجديدة هنا...", habitAdd: "أضف عادة", thHabName: "العادة اليومية", thHabDel: "حذف", dSat: "السبت", dSun: "الأحد", dMon: "الاثنين", dTue: "الثلاثاء", dWed: "الأربعاء", dThu: "الخميس", dFri: "الجمعة",
                 savingsHeader: "تحديث ميزانية الشهر الحالي 💰", lblInc: "الراتب / الدخل:", lblSav: "المدخرات المحققة:", lblInv: "الاستثمار:", lblTotSaved: "إجمالي التوفير والاستثمار", lblSavRatio: "نسبة الادخار من الدخل", chartTitle: "📊 منحنى تقدم المدخرات والاستثمار التلقائي",
                 balHeader: "تتبع أرصدة الحسابات الأسبوعية 💳", lblCash: "المبلغ الكاش:", lblBank: "الحساب البنكي:", lblOth: "مبالغ أخرى:", lblTotBal: "💰 إجمالي الرصيد",
+                currencies: [
+                    { value: "د.ج", text: "دينار جزائري (د.ج)" },
+                    { value: "ر.س", text: "ريال سعودي (ر.س)" },
+                    { value: "$", text: "دولار ($)" },
+                    { value: "€", text: "يورو (€)" }
+                ],
                 calMonths: ["يناير", "فبراير", "مارس", "أبريل", "مايو", "يونيو", "يوليو", "أغسطس", "سبتمبر", "أكتوبر", "نوفمبر", "ديسمبر"], calDays: ["السبت", "الأحد", "الاثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة"],
-                modalTitle: "تعديل المواعيد ليوم: ", modalPlh: "اكتبي الموعد أو الحدث اليومي الخاص بكِ هنا...", btnCalCancel: "إلغاء", btnCalSave: "حفظ الموعد", gratTitle: "🙏 اكتبِ مَشاعرك الإيجابية لهذا الأسبوع", gratPlh: "ما الشيء الجميل الذي حدث معك اليوم؟", gratAdd: "تسجيل"
+                modalTitle: "تعديل المواعيد ليوم: ", modalPlh: "اكتبي الموعد أو الحدث اليومي الخاص بكِ هنا...", btnCalCancel: "إلغاء", btnCalSave: "حفظ الموعد", gratTitle: "🙏 اكتبِ مَشاعرك الإيجابية لهذا الأسبوع", gratPlh: "ما الشيء الجميل الذي حدث معك اليوم？", gratAdd: "تسجيل"
             },
             en: {
                 toggleBtn: "العربية 🌐", subtitleBadge: "Plan Your Life Professionally 🎯", mainTitle: "Life Manager ", desc: "Your Vision • Your Goals • Your Plans All in One Place",
@@ -245,6 +268,12 @@
                 habitsTitle: "🔄 Daily Habit Tracker", habitPlh: "Write your new daily habit here...", habitAdd: "Add Habit", thHabName: "Daily Habit", thHabDel: "Delete", dSat: "Sat", dSun: "Sun", dMon: "Mon", dTue: "Tue", dWed: "Wed", dThu: "Thu", dFri: "Fri",
                 savingsHeader: "Update This Month's Budget 💰", lblInc: "Salary / Income:", lblSav: "Saved Amount:", lblInv: "Investment:", lblTotSaved: "Total Savings & Investments", lblSavRatio: "Savings Ratio", chartTitle: "📊 Automated Savings Progress Chart",
                 balHeader: "Weekly Account Balances Tracking 💳", lblCash: "Cash Amount:", lblBank: "Bank Account:", lblOth: "Other Funds:", lblTotBal: "💰 Total Balance",
+                currencies: [
+                    { value: "DZD", text: "Algerian Dinar (DZD)" },
+                    { value: "SAR", text: "Saudi Riyal (SAR)" },
+                    { value: "$", text: "Dollar ($)" },
+                    { value: "€", text: "Euro (€)" }
+                ],
                 calMonths: ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"], calDays: ["Sat", "Sun", "Mon", "Tue", "Wed", "Thu", "Fri"],
                 modalTitle: "Edit events for: ", modalPlh: "Write your appointment or daily note here...", btnCalCancel: "Cancel", btnCalSave: "Save Event", gratTitle: "🙏 Log Your Positive Feelings For This Week", gratPlh: "What beautiful thing happened to you today?", gratAdd: "Save"
             }
@@ -256,8 +285,8 @@
             vision: "بحلول عام 2028، سأمتلك مشروعي الخاص، وسأحقق الاستقرار المالي.",
             goals: [{ type: "التعليم / Education", title: "الحصول على معدل تراكمي ممتاز بنهاية العام", how: "تقدير ممتاز في جميع المقررات", status: "جاري 🔄" }],
             habits: [{ title: "شرب 2 لتر ماء يومياً 💧", sat: true, sun: true, mon: false, tue: true, wed: false, thu: false, fri: false }],
-            savings: { salary: 10000, saved: 2200, invest: 200 },
-            balance: { cash: 12500, bank: 8500, other: 5000 },
+            savings: { salary: 10000, saved: 2200, invest: 200, currencyIndex: 1 }, // 1 للريال السعودي
+            balance: { cash: 12500, bank: 8500, other: 5000, currencyIndex: 1 },
             gratitude: ["الحمد لله على كل النعم 🤍"],
             events: { "2026-07-02": "Election Day 🗳️", "2026-07-05": "Independence 🎆" } 
         };
@@ -267,7 +296,14 @@
         let activeSelectedDate = '';
 
         window.onload = function() {
-            if (localStorage.getItem('lifeManagerDataV4')) { appData = JSON.parse(localStorage.getItem('lifeManagerDataV4')); }
+            if (localStorage.getItem('lifeManagerDataV4')) { 
+                const saved = JSON.parse(localStorage.getItem('lifeManagerDataV4'));
+                if (saved) {
+                    appData = saved;
+                    if(appData.savings.currencyIndex === undefined) appData.savings.currencyIndex = 1;
+                    if(appData.balance.currencyIndex === undefined) appData.balance.currencyIndex = 1;
+                }
+            }
             if(!appData.events) appData.events = {};
             
             document.getElementById('vision-input').value = appData.vision || "";
@@ -297,6 +333,28 @@
             renderCalendar();
         };
 
+        function updateCurrencySelects() {
+            const savingsSelect = document.getElementById('savings-currency-select');
+            const balanceSelect = document.getElementById('currency-select');
+            
+            savingsSelect.innerHTML = '';
+            balanceSelect.innerHTML = '';
+
+            langData[currentLang].currencies.forEach((c, idx) => {
+                let optS = document.createElement('option');
+                optS.value = idx;
+                optS.innerText = c.text;
+                if(idx === appData.savings.currencyIndex) optS.selected = true;
+                savingsSelect.appendChild(optS);
+
+                let optB = document.createElement('option');
+                optB.value = idx;
+                optB.innerText = c.text;
+                if(idx === appData.balance.currencyIndex) optB.selected = true;
+                balanceSelect.appendChild(optB);
+            });
+        }
+
         function toggleLanguage() {
             currentLang = (currentLang === 'ar') ? 'en' : 'ar';
             const htmlTag = document.getElementById('app-html');
@@ -317,6 +375,8 @@
             renderGoals();
             renderHabits();
             renderCalendar();
+            calculateSavings();
+            calculateTotalBalance();
             if(myChart) { myChart.destroy(); initChart(); }
         }
 
@@ -374,6 +434,8 @@
             document.getElementById('txt-grat-title').innerText = l.gratTitle;
             document.getElementById('gratitude-input').placeholder = l.gratPlh;
             document.getElementById('btn-grat-add').innerText = l.gratAdd;
+            
+            updateCurrencySelects();
         }
 
         function saveData() {
@@ -381,9 +443,16 @@
             appData.savings.salary = parseFloat(document.getElementById('salary-input').value) || 0;
             appData.savings.saved = parseFloat(document.getElementById('saved-input').value) || 0;
             appData.savings.invest = parseFloat(document.getElementById('invest-input').value) || 0;
+            
+            const sIdx = document.getElementById('savings-currency-select').value;
+            if(sIdx !== null && sIdx !== undefined) appData.savings.currencyIndex = parseInt(sIdx);
+
             appData.balance.cash = parseFloat(document.getElementById('cash-input').value) || 0;
             appData.balance.bank = parseFloat(document.getElementById('bank-input').value) || 0;
             appData.balance.other = parseFloat(document.getElementById('other-input').value) || 0;
+            
+            const bIdx = document.getElementById('currency-select').value;
+            if(bIdx !== null && bIdx !== undefined) appData.balance.currencyIndex = parseInt(bIdx);
             
             localStorage.setItem('lifeManagerDataV4', JSON.stringify(appData));
             if(myChart) {
@@ -440,19 +509,27 @@
         function deleteHabit(index) { appData.habits.splice(index, 1); saveData(); renderHabits(); }
 
         function calculateSavings() {
+            const selectEl = document.getElementById('savings-currency-select');
+            if(selectEl && selectEl.value !== "") appData.savings.currencyIndex = parseInt(selectEl.value);
+            
             saveData();
+            
+            const currencySymbol = langData[currentLang].currencies[appData.savings.currencyIndex].value;
             const total = appData.savings.saved + appData.savings.invest;
-            document.getElementById('total-saved-text').innerText = total.toLocaleString() + (currentLang==='ar'?" ر.س":" SAR");
+            document.getElementById('total-saved-text').innerText = total.toLocaleString() + " " + currencySymbol;
             const ratio = appData.savings.salary > 0 ? Math.round((total / appData.savings.salary) * 100) : 0;
             document.getElementById('savings-ratio-text').innerText = ratio + "%";
         }
 
-        // دالة تتبع الرصيد الأسبوعي الحسابي المضاف إليها معالجة العملات الجديدة المخصصة
         function calculateTotalBalance() {
+            const selectEl = document.getElementById('currency-select');
+            if(selectEl && selectEl.value !== "") appData.balance.currencyIndex = parseInt(selectEl.value);
+            
             saveData();
-            const currency = document.getElementById('currency-select').value;
+            
+            const currencySymbol = langData[currentLang].currencies[appData.balance.currencyIndex].value;
             const total = appData.balance.cash + appData.balance.bank + appData.balance.other;
-            document.getElementById('total-balance-text').innerText = total.toLocaleString() + " " + currency;
+            document.getElementById('total-balance-text').innerText = total.toLocaleString() + " " + currencySymbol;
         }
 
         function initChart() {
