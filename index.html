@@ -3,445 +3,592 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>مدير الحياة v3.3 - Life Manager</title>
-    <!-- Tailwind CSS -->
+    <title>مدير الحياة v3.0 - Life Manager</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-    <!-- Google Fonts (Cairo) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap" rel="stylesheet">
-    <!-- Chart.js -->
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        body { font-family: 'Cairo', sans-serif; }
+        body { font-family: 'Cairo', sans-serif; transition: all 0.3s ease; }
         .calendar-grid-fixed {
             display: grid;
             grid-template-columns: repeat(7, minmax(0, 1fr));
+            grid-auto-rows: 90px;
         }
-        .tab-content { display: none; }
-        .tab-content.active { display: block; }
-        .nav-btn.active { color: #34d399; font-weight: 600; }
     </style>
 </head>
-<body class="bg-slate-900 text-slate-100 min-h-screen pb-24">
+<body class="bg-gray-50 text-gray-800" id="app-body">
 
-    <!-- بنر الرأس البنفسجي الأصلي واللغة الأصلية -->
-    <div id="header-banner" class="bg-gradient-to-r from-violet-600 via-purple-600 to-pink-600 text-white px-6 py-8 text-center rounded-b-[2.5rem] shadow-xl relative overflow-hidden mb-6">
-        <button onclick="toggleLanguage()" class="absolute top-4 left-4 bg-white/20 text-xs px-3 py-1.5 rounded-full backdrop-blur-sm font-medium hover:bg-white/30 transition-all">
-            <span id="lang-btn-text">English</span>
-        </button>
-        <div class="inline-block bg-white/20 text-xs font-semibold px-3 py-1 rounded-full backdrop-blur-sm mb-2 tracking-wide">
-            🎯 <span id="header-tag">خُطط لحياتك بشكل احترافي</span>
+    <header class="bg-indigo-900 text-white shadow-lg py-6 px-4 text-center relative overflow-hidden">
+        <div class="absolute inset-0 bg-gradient-to-r from-purple-800 to-indigo-900 opacity-50"></div>
+        <div class="absolute top-4 left-4 z-20">
+            <button onclick="toggleLanguage()" id="lang-toggle-btn" class="bg-white text-indigo-900 font-bold px-4 py-1.5 rounded-xl text-xs shadow hover:bg-gray-100 transition-all cursor-pointer">
+                English 🌐
+            </button>
         </div>
-        <h1 class="text-3xl font-extrabold tracking-tight mb-2 flex justify-center items-center gap-2">
-            <span id="header-title">مُدير الحياة</span> 
-            <span class="text-yellow-300 text-sm bg-white/10 px-2 py-0.5 rounded-md backdrop-blur-sm">v3.3</span>
-        </h1>
-        <p id="header-subtitle" class="text-xs text-purple-100 opacity-90">رؤيتك ▪ أهدافك ▪ خططك كلها في مكان واحد</p>
-    </div>
+        <div class="relative z-10">
+            <span id="txt-subtitle-badge" class="bg-purple-600 text-xs px-3 py-1 rounded-full font-bold mb-2 inline-block">خُطط لحياتك بشكل احترافي 🎯</span>
+            <h1 id="txt-main-title" class="text-3xl md:text-4xl font-black mt-1">مُدير الحياة <span class="text-purple-300">v3.0</span></h1>
+            <p id="txt-desc" class="text-sm md:text-base text-indigo-200 mt-2">رؤيتك • أهدافك • خطتك كلها في مكان واحد</p>
+        </div>
+    </header>
 
-    <!-- شبكة التحكم الرئيسية (الأزرار الأصلية للتنقل) -->
-    <div class="max-w-md mx-auto px-4 mb-6">
-        <div class="bg-slate-800/90 border border-slate-700/50 p-4 rounded-3xl shadow-xl backdrop-blur-sm grid grid-cols-2 gap-3 text-center">
-            <button onclick="switchTab('todo')" class="p-3 bg-slate-700/30 hover:bg-slate-700/50 rounded-2xl border border-slate-700/50 flex flex-col items-center justify-center gap-1 transition-all">
-                <span class="text-xl">📝</span>
-                <span id="menu-todo" class="text-xs font-bold">المهام</span>
-            </button>
-            <button onclick="switchTab('goals')" class="p-3 bg-slate-700/30 hover:bg-slate-700/50 rounded-2xl border border-slate-700/50 flex flex-col items-center justify-center gap-1 transition-all">
-                <span class="text-xl">🎯</span>
-                <span id="menu-goals" class="text-xs font-bold">الأهداف</span>
-            </button>
-            <button onclick="switchTab('habits')" class="p-3 bg-slate-700/30 hover:bg-slate-700/50 rounded-2xl border border-slate-700/50 flex flex-col items-center justify-center gap-1 transition-all">
-                <span class="text-xl">🔄</span>
-                <span id="menu-habits" class="text-xs font-bold">العادات</span>
-            </button>
-            <button onclick="switchTab('savings')" class="p-3 bg-slate-700/30 hover:bg-slate-700/50 rounded-2xl border border-slate-700/50 flex flex-col items-center justify-center gap-1 transition-all">
-                <span class="text-xl">💰</span>
-                <span id="menu-savings" class="text-xs font-bold">المدخرات والمنحنى</span>
-            </button>
-            <button onclick="switchTab('calendar')" class="p-3 bg-slate-700/30 hover:bg-slate-700/50 rounded-2xl border border-slate-700/50 col-span-2 flex items-center justify-center gap-2 transition-all">
-                <span class="text-xl">📅</span>
-                <span id="menu-calendar" class="text-sm font-bold">التقويم والمواعيد</span>
-            </button>
-            <button onclick="switchTab('gratitude')" class="p-3 bg-slate-700/30 hover:bg-slate-700/50 rounded-2xl border border-slate-700/50 col-span-2 flex items-center justify-center gap-2 transition-all">
-                <span class="text-xl">🙏</span>
-                <span id="menu-gratitude" class="text-sm font-bold">الامتنان</span>
-            </button>
+    <div class="max-w-7xl mx-auto px-4 mt-6">
+        <div class="flex flex-wrap justify-center gap-2 bg-white p-2 rounded-2xl shadow-sm border border-gray-100">
+            <button onclick="switchTab('todo')" id="btn-todo" class="tab-btn px-4 py-2 rounded-xl font-bold transition-all bg-indigo-600 text-white shadow-md">📝 <span id="lbl-tab-todo">المهام</span></button>
+            <button onclick="switchTab('goals')" id="btn-goals" class="tab-btn px-4 py-2 rounded-xl font-bold transition-all text-gray-600 hover:bg-gray-100">🎯 <span id="lbl-tab-goals">الأهداف</span></button>
+            <button onclick="switchTab('habits')" id="btn-habits" class="tab-btn px-4 py-2 rounded-xl font-bold transition-all text-gray-600 hover:bg-gray-100">🔄 <span id="lbl-tab-habits">العادات</span></button>
+            <button onclick="switchTab('savings')" id="btn-savings" class="tab-btn px-4 py-2 rounded-xl font-bold transition-all text-gray-600 hover:bg-gray-100">💰 <span id="lbl-tab-savings">المدخرات والمنحنى</span></button>
+            <button onclick="switchTab('balance')" id="btn-balance" class="tab-btn px-4 py-2 rounded-xl font-bold transition-all text-gray-600 hover:bg-gray-100">💳 <span id="lbl-tab-balance">الرصيد</span></button>
+            <button onclick="switchTab('calendar')" id="btn-calendar" class="tab-btn px-4 py-2 rounded-xl font-bold transition-all text-gray-600 hover:bg-gray-100">📅 <span id="lbl-tab-calendar">التقويم والمواعيد</span></button>
+            <button onclick="switchTab('gratitude')" id="btn-gratitude" class="tab-btn px-4 py-2 rounded-xl font-bold transition-all text-gray-600 hover:bg-gray-100">🙏 <span id="lbl-tab-gratitude">الامتنان</span></button>
         </div>
     </div>
 
-    <!-- المحتوى الرئيسي للمجموعات -->
-    <main class="max-w-md mx-auto px-4">
+    <main class="max-w-7xl mx-auto px-4 py-6 mb-12">
 
-        <!-- تبويب المهام -->
-        <div id="tab-todo" class="tab-content active space-y-4">
-            <div class="bg-slate-800/90 border border-slate-700/50 p-5 rounded-3xl shadow-xl">
-                <h3 class="font-bold text-base text-emerald-400 mb-4 flex items-center gap-2">✅ <span id="title-todo">قائمة مهام اليوم</span></h3>
-                <div class="flex gap-2 mb-4">
-                    <input type="text" id="todo-input" class="flex-1 bg-slate-700/50 border border-slate-600 rounded-2xl px-4 py-2.5 text-sm focus:outline-none focus:border-purple-500">
-                    <button onclick="addTodo()" class="bg-emerald-500 hover:bg-emerald-600 px-4 rounded-2xl font-bold text-lg transition-all">+</button>
+        <section id="tab-todo" class="tab-content block space-y-6">
+            <div class="bg-indigo-50 border border-indigo-200 p-5 rounded-2xl">
+                <h3 id="txt-todo-title" class="font-bold text-indigo-900 text-lg mb-2">📋 قائمة المهام اليومية</h3>
+                <div class="flex gap-2">
+                    <input type="text" id="todo-input" class="p-3 bg-white border border-indigo-200 rounded-xl text-sm flex-1 focus:outline-none" placeholder="...">
+                    <button onclick="addTodo()" id="btn-todo-add" class="bg-indigo-600 text-white font-bold px-6 rounded-xl text-sm">إضافة</button>
                 </div>
-                <ul id="todo-list" class="space-y-2"></ul>
             </div>
-        </div>
+            <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100">
+                <ul id="todo-list" class="space-y-3"></ul>
+            </div>
+        </section>
 
-        <!-- تبويب الأهداف -->
-        <div id="tab-goals" class="tab-content space-y-4">
-            <div class="bg-slate-800/90 border border-slate-700/50 p-5 rounded-3xl shadow-xl">
-                <h3 class="font-bold text-base text-purple-400 mb-4 flex items-center gap-2">🎯 <span id="title-goals">الأهداف والخطط</span></h3>
-                <div class="flex gap-2 mb-4">
-                    <input type="text" id="goal-input" class="flex-1 bg-slate-700/50 border border-slate-600 rounded-2xl px-4 py-2.5 text-sm focus:outline-none focus:border-purple-500">
-                    <button onclick="addGoal()" class="bg-purple-500 hover:bg-purple-600 px-4 rounded-2xl font-bold text-lg transition-all">+</button>
+        <section id="tab-goals" class="tab-content hidden space-y-6">
+            <div class="bg-purple-50 border border-purple-200 p-4 rounded-2xl">
+                <h3 id="txt-vision-title" class="font-bold text-purple-900 mb-2">💡 خلية الرؤية (3 سنوات):</h3>
+                <input type="text" id="vision-input" oninput="saveData()" class="w-full bg-white p-3 rounded-xl border border-purple-200 text-purple-900 font-semibold focus:outline-none">
+            </div>
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                <div id="txt-goals-header" class="p-4 bg-purple-700 text-white font-bold">أهداف 12 شهر 🗓️</div>
+                <div class="p-4 bg-gray-50 border-b border-gray-100 grid grid-cols-1 md:grid-cols-4 gap-3">
+                    <input type="text" id="goal-title" class="p-2.5 bg-white border rounded-xl text-sm" placeholder="">
+                    <input type="text" id="goal-how" class="p-2.5 bg-white border rounded-xl text-sm" placeholder="">
+                    <select id="goal-type" class="p-2.5 bg-white border rounded-xl text-sm">
+                        <option value="التعليم / Education" id="opt-edu">التعليم</option>
+                        <option value="المهنة / Career" id="opt-career">المهنة</option>
+                        <option value="المالية / Finance" id="opt-finance">المالية</option>
+                    </select>
+                    <button onclick="addGoal()" id="btn-goal-add" class="bg-purple-600 text-white font-bold py-2.5 rounded-xl text-sm">+ إضافة</button>
                 </div>
-                <ul id="goal-list" class="space-y-2"></ul>
-            </div>
-        </div>
-
-        <!-- تبويب العادات -->
-        <div id="tab-habits" class="tab-content space-y-4">
-            <div class="bg-slate-800/90 border border-slate-700/50 p-5 rounded-3xl shadow-xl">
-                <h3 class="font-bold text-base text-indigo-400 mb-4 flex items-center gap-2">🌿 <span id="title-habits">بناء وتتبع العادات</span></h3>
-                <div class="flex gap-2 mb-4">
-                    <input type="text" id="habit-input" class="flex-1 bg-slate-700/50 border border-slate-600 rounded-2xl px-4 py-2.5 text-sm focus:outline-none focus:border-indigo-500">
-                    <button onclick="addHabit()" class="bg-indigo-500 hover:bg-indigo-600 px-4 rounded-2xl font-bold text-lg transition-all">+</button>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-start border-collapse">
+                        <thead>
+                            <tr class="bg-gray-50 text-xs text-gray-500 font-bold">
+                                <th class="p-4" id="th-type">النوع</th>
+                                <th class="p-4" id="th-goal">الهدف</th>
+                                <th class="p-4" id="th-how">كيف؟</th>
+                                <th class="p-4" id="th-status">الحالة</th>
+                                <th class="p-4" id="th-action">إجراء</th>
+                            </tr>
+                        </thead>
+                        <tbody id="goals-table-body" class="text-sm divide-y"></tbody>
+                    </table>
                 </div>
-                <ul id="habit-list" class="space-y-2"></ul>
             </div>
-        </div>
+        </section>
 
-        <!-- تبويب الميزانية مع العملات المخصصة هنا فقط -->
-        <div id="tab-savings" class="tab-content space-y-4">
-            <div class="bg-slate-800/90 border border-slate-700/50 p-5 rounded-3xl shadow-xl space-y-4">
-                <div class="flex justify-between items-center border-b border-slate-700 pb-3">
-                    <h3 class="font-bold text-base text-amber-400 flex items-center gap-2">💰 <span id="title-savings">المدخرات والميزانية الذكية</span></h3>
-                    
-                    <!-- هنا تظهر العملات فقط وحصرياً -->
-                    <select id="currency-select" onchange="updateCurrency()" class="bg-slate-700 text-xs rounded-xl px-2 py-1 border border-slate-600 focus:outline-none text-slate-200">
+        <section id="tab-habits" class="tab-content hidden space-y-6">
+            <div class="bg-blue-50 border border-blue-200 p-4 rounded-2xl">
+                <h3 id="txt-habits-title" class="font-bold text-blue-900 mb-2">🔄 متتبع الإنجاز اليومي للعادات</h3>
+                <div class="flex gap-2">
+                    <input type="text" id="habit-title" class="p-2.5 bg-white border rounded-xl text-sm flex-1 focus:outline-none" placeholder="">
+                    <button onclick="addHabit()" id="btn-habit-add" class="bg-blue-600 text-white font-bold px-5 rounded-xl text-sm">أضف</button>
+                </div>
+            </div>
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-center border-collapse">
+                        <thead>
+                            <tr class="bg-blue-600 text-white text-xs font-bold">
+                                <th class="p-4 text-start" id="th-habit-name">العادة</th>
+                                <th id="d-sat">السبت</th><th id="d-sun">الأحد</th><th id="d-mon">الاثنين</th><th id="d-tue">الثلاثاء</th><th id="d-wed">الأربعاء</th><th id="d-thu">الخميس</th><th id="d-fri">الجمعة</th>
+                                <th class="p-4" id="th-habit-del">حذف</th>
+                            </tr>
+                        </thead>
+                        <tbody id="habits-table-body" class="text-sm divide-y"></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <section id="tab-savings" class="tab-content hidden space-y-6">
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                <div id="txt-savings-header" class="p-4 bg-emerald-700 text-white font-bold">تحديث ميزانية الشهر الحالي 💰</div>
+                <div class="p-4 grid grid-cols-1 md:grid-cols-3 gap-4 bg-gray-50">
+                    <div>
+                        <label id="lbl-inc" class="block text-xs text-gray-500 font-bold mb-1">الراتب / الدخل:</label>
+                        <input type="number" id="salary-input" oninput="calculateSavings()" class="w-full p-2.5 bg-white border rounded-xl text-sm focus:outline-none" value="10000">
+                    </div>
+                    <div>
+                        <label id="lbl-sav" class="block text-xs text-gray-500 font-bold mb-1">المدخرات المحققة:</label>
+                        <input type="number" id="saved-input" oninput="calculateSavings()" class="w-full p-2.5 bg-white border rounded-xl text-sm focus:outline-none" value="2200">
+                    </div>
+                    <div>
+                        <label id="lbl-inv" class="block text-xs text-gray-500 font-bold mb-1">الاستثمار:</label>
+                        <input type="number" id="invest-input" oninput="calculateSavings()" class="w-full p-2.5 bg-white border rounded-xl text-sm focus:outline-none" value="200">
+                    </div>
+                </div>
+                <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-4 border-t border-gray-100">
+                    <div class="bg-emerald-50 p-4 rounded-xl text-center">
+                        <span id="lbl-tot-saved" class="text-xs text-emerald-700 font-bold block">إجمالي التوفير والاستثمار</span>
+                        <span id="total-saved-text" class="text-xl font-black text-emerald-900">2,400 ر.س</span>
+                    </div>
+                    <div class="bg-blue-50 p-4 rounded-xl text-center">
+                        <span id="lbl-sav-ratio" class="text-xs text-blue-700 font-bold block">نسبة الادخار من الدخل</span>
+                        <span id="savings-ratio-text" class="text-xl font-black text-blue-900">24%</span>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 space-y-4">
+                <h4 id="txt-chart-title" class="font-bold text-gray-700 flex items-center gap-2">📊 منحنى تقدم المدخرات والاستثمار التلقائي</h4>
+                <div class="relative w-full h-64">
+                    <canvas id="savingsChart"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <section id="tab-balance" class="tab-content hidden space-y-6">
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                <div class="p-4 bg-slate-900 text-white font-bold flex justify-between items-center">
+                    <span id="txt-bal-header">تتبع أرصدة الحسابات الأسبوعية 💳</span>
+                    <select id="currency-select" onchange="calculateTotalBalance()" class="bg-slate-800 text-white font-bold text-xs rounded-xl px-3 py-1.5 border border-slate-700 focus:outline-none cursor-pointer">
                         <option value="د.ج">دينار جزائري (د.ج)</option>
-                        <option value="ر.س">ريال سعودي (ر.س)</option>
+                        <option value="ر.س" selected>ريال سعودي (ر.س)</option>
                         <option value="$">دولار ($)</option>
                         <option value="€">يورو (€)</option>
                     </select>
                 </div>
-
-                <div class="grid grid-cols-2 gap-3">
-                    <div class="bg-slate-700/30 p-3.5 rounded-2xl border border-slate-700">
-                        <p id="label-saved" class="text-slate-400 text-xs mb-1">المبلغ المدخر</p>
-                        <p class="text-base font-bold text-emerald-400"><span class="currency-label">د.ج</span> <span id="total-savings-num">0</span></p>
-                    </div>
-                    <div class="bg-slate-700/30 p-3.5 rounded-2xl border border-slate-700">
-                        <p id="label-spent" class="text-slate-400 text-xs mb-1">المتبقي للمصاريف</p>
-                        <p class="text-base font-bold text-teal-400"><span class="currency-label">د.ج</span> <span id="budget-balance-num">0</span></p>
-                    </div>
-                </div>
-
-                <div class="space-y-3 pt-1">
-                    <div>
-                        <label id="input-money-label" class="block text-xs text-slate-400 mb-1">المبلغ الإجمالي الكلي:</label>
-                        <input type="number" id="savings-amount" class="w-full bg-slate-700/50 border border-slate-600 rounded-2xl px-4 py-2.5 text-sm focus:outline-none">
-                    </div>
-                    <div class="grid grid-cols-2 gap-3">
-                        <div>
-                            <label id="input-save-label" class="block text-xs text-slate-400 mb-1">نسبة الادخار (%):</label>
-                            <input type="number" id="savings-percent" value="20" class="w-full bg-slate-700/50 border border-slate-600 rounded-2xl px-3 py-2 text-sm focus:outline-none">
-                        </div>
-                        <div>
-                            <label id="input-spend-label" class="block text-xs text-slate-400 mb-1">نسبة المصاريف (%):</label>
-                            <input type="number" id="expenses-percent" value="80" class="w-full bg-slate-700/50 border border-slate-600 rounded-2xl px-3 py-2 text-sm focus:outline-none">
-                        </div>
-                    </div>
-                    <button onclick="calculateBudget()" id="btn-calc" class="w-full bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-sm py-2.5 rounded-2xl transition-all shadow-lg">احسب الميزانية والادخار</button>
-                </div>
-                <div class="pt-2">
-                    <canvas id="savingsChart" class="max-h-40"></canvas>
+                <div class="p-4 grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <div><label id="lbl-cash" class="text-xs text-gray-500 font-bold block mb-1">المبلغ الكاش:</label><input type="number" id="cash-input" oninput="calculateTotalBalance()" class="w-full p-2.5 border rounded-xl text-sm focus:outline-none" value="12500"></div>
+                    <div><label id="lbl-bank" class="text-xs text-gray-500 font-bold block mb-1">الحساب البنكي:</label><input type="number" id="bank-input" oninput="calculateTotalBalance()" class="w-full p-2.5 border rounded-xl text-sm focus:outline-none" value="8500"></div>
+                    <div><label id="lbl-oth" class="text-xs text-gray-500 font-bold block mb-1">مبالغ أخرى:</label><input type="number" id="other-input" oninput="calculateTotalBalance()" class="w-full p-2.5 border rounded-xl text-sm focus:outline-none" value="5000"></div>
+                    <div class="bg-slate-100 p-3 rounded-xl flex flex-col justify-center text-center"><span id="lbl-tot-bal" class="text-xs text-gray-500 font-bold">💰 إجمالي الرصيد</span><span id="total-balance-text" class="text-lg font-black text-slate-900">26,000 ر.س</span></div>
                 </div>
             </div>
-        </div>
+        </section>
 
-        <!-- تبويب التقويم والمواعيد المصلح بالكامل لعام 2026 -->
-        <div id="tab-calendar" class="tab-content space-y-4">
-            <div class="bg-slate-800/90 border border-slate-700/50 p-5 rounded-3xl shadow-xl">
-                <div class="flex justify-between items-center mb-4">
-                    <h3 id="calendar-month-year" class="font-bold text-indigo-400 flex items-center gap-2 text-sm">📅 التقويم والمواعيد</h3>
-                    <div class="flex gap-1">
-                        <button onclick="prevMonth()" class="bg-slate-700 hover:bg-slate-600 px-2 py-1 rounded-xl text-xs">&gt;</button>
-                        <button onclick="nextMonth()" class="bg-slate-700 hover:bg-slate-600 px-2 py-1 rounded-xl text-xs">&lt;</button>
+        <section id="tab-calendar" class="tab-content hidden relative">
+            <div class="bg-slate-900 text-gray-100 p-4 rounded-t-3xl flex justify-between items-center border-b border-slate-800">
+                <div class="flex items-center gap-2">
+                    <select id="cal-month" onchange="renderCalendar()" class="bg-transparent text-xl font-bold text-white focus:outline-none cursor-pointer border-none p-1"></select>
+                    <select id="cal-year" onchange="renderCalendar()" class="bg-transparent text-sm text-gray-400 focus:outline-none cursor-pointer border-none p-1">
+                        <option value="2026" class="bg-slate-900" selected>2026</option>
+                        <option value="2027" class="bg-slate-900">2027</option>
+                    </select>
+                </div>
+                <div class="flex items-center gap-4 text-gray-400">
+                    <span class="text-lg cursor-pointer hover:text-white">🔍</span>
+                    <span class="text-lg cursor-pointer hover:text-white font-bold bg-slate-800 px-2.5 py-1 rounded-xl text-xs text-white">12</span>
+                </div>
+            </div>
+
+            <div class="bg-slate-950 p-3 border-x border-b border-slate-800 rounded-b-3xl shadow-2xl relative min-h-[500px]">
+                <div class="grid grid-cols-7 text-center text-xs font-semibold text-gray-400 mb-4 pb-2 border-b border-slate-900" id="calendar-days-header"></div>
+                <div id="calendar-grid" class="calendar-grid-fixed gap-1"></div>
+                <button onclick="openCalendarModalWithActive()" class="absolute bottom-6 left-6 w-14 h-14 bg-sky-600 hover:bg-sky-500 text-white rounded-2xl flex items-center justify-center text-3xl font-light shadow-xl transition-all active:scale-95 cursor-pointer z-10">+</button>
+            </div>
+
+            <div id="modal-calendar" class="hidden fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
+                <div class="bg-slate-900 text-white w-full max-w-sm rounded-3xl p-6 space-y-4 border border-slate-800 shadow-2xl">
+                    <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+                        <h4 id="modal-date-title" class="font-bold text-gray-100 text-base"></h4>
+                        <button onclick="closeCalendarModal()" class="text-gray-400 hover:text-white font-bold text-lg cursor-pointer">✕</button>
+                    </div>
+                    <textarea id="modal-date-text" rows="4" class="w-full p-3 bg-slate-950 border border-slate-800 text-gray-100 rounded-2xl text-sm focus:outline-none focus:border-sky-500" placeholder="..."></textarea>
+                    <div class="flex justify-end gap-2 text-xs font-bold">
+                        <button onclick="closeCalendarModal()" id="btn-cal-cancel" class="px-4 py-2.5 bg-slate-800 text-gray-300 rounded-xl hover:bg-slate-700">إلغاء</button>
+                        <button onclick="saveCalendarDay()" id="btn-cal-save" class="px-5 py-2.5 bg-sky-600 text-white rounded-xl hover:bg-sky-500">حفظ الموعد</button>
                     </div>
                 </div>
-                <div id="calendar-weekdays" class="calendar-grid-fixed text-center text-[10px] font-bold text-slate-400 mb-2">
-                    <div>السبت</div><div>الأحد</div><div>الاثنين</div><div>الثلاثاء</div><div>الأربعاء</div><div>الخميس</div><div>الجمعة</div>
-                </div>
-                <div id="calendar-days" class="calendar-grid-fixed gap-1 text-center text-xs"></div>
             </div>
-        </div>
+        </section>
 
-        <!-- تبويب الامتنان -->
-        <div id="tab-gratitude" class="tab-content space-y-4">
-            <div class="bg-slate-800/90 border border-slate-700/50 p-5 rounded-3xl shadow-xl">
-                <h3 class="font-bold text-base text-rose-400 mb-4 flex items-center gap-2">🙏 <span id="title-gratitude">مذكرات الامتنان والبهجة</span></h3>
-                <div class="flex gap-2 mb-4">
-                    <input type="text" id="gratitude-input" class="flex-1 bg-slate-700/50 border border-slate-600 rounded-2xl px-4 py-2.5 text-sm focus:outline-none">
-                    <button onclick="addGratitude()" class="bg-rose-500 hover:bg-rose-600 px-4 rounded-2xl font-bold text-lg transition-all">+</button>
+        <section id="tab-gratitude" class="tab-content hidden space-y-6">
+            <div class="bg-fuchsia-50 border border-fuchsia-200 p-4 rounded-2xl">
+                <h3 id="txt-grat-title" class="font-bold text-fuchsia-900 mb-1">🙏 اكتبِ مَشاعرك الإيجابية لهذا الأسبوع</h3>
+                <div class="mt-3 flex gap-2">
+                    <input type="text" id="gratitude-input" class="p-2.5 bg-white border border-fuchsia-200 rounded-xl text-sm flex-1 focus:outline-none" placeholder="">
+                    <button onclick="addGratitude()" id="btn-grat-add" class="bg-fuchsia-600 text-white font-bold px-5 rounded-xl text-sm">تسجيل</button>
                 </div>
-                <ul id="gratitude-list" class="space-y-2"></ul>
             </div>
-        </div>
+            <div class="bg-white p-5 rounded-2xl border"><ul id="gratitude-list" class="space-y-2 text-sm text-gray-700"></ul></div>
+        </section>
 
     </main>
 
-    <!-- شريط التنقل السفلي الأصلي لتطبيقكِ -->
-    <nav class="bg-slate-800/95 border-t border-slate-700/50 fixed bottom-0 left-0 right-0 py-2 px-2 flex justify-around items-center backdrop-blur-md z-50 rounded-t-3xl shadow-2xl">
-        <button onclick="switchTab('todo')" id="nav-todo" class="nav-btn active flex flex-col items-center gap-0.5 text-xs"><span>✅</span><span id="nav-text-todo">المهام</span></button>
-        <button onclick="switchTab('goals')" id="nav-goals" class="nav-btn flex flex-col items-center gap-0.5 text-slate-400 text-xs"><span>🎯</span><span id="nav-text-goals">الأهداف</span></button>
-        <button onclick="switchTab('habits')" id="nav-habits" class="nav-btn flex flex-col items-center gap-0.5 text-slate-400 text-xs"><span>🌿</span><span id="nav-text-habits">العادات</span></button>
-        <button onclick="switchTab('savings')" id="nav-savings" class="nav-btn flex flex-col items-center gap-0.5 text-slate-400 text-xs"><span>💰</span><span id="nav-text-savings">الميزانية</span></button>
-        <button onclick="switchTab('calendar')" id="nav-calendar" class="nav-btn flex flex-col items-center gap-0.5 text-slate-400 text-xs"><span>📅</span><span id="nav-text-calendar">التقويم</span></button>
-        <button onclick="switchTab('gratitude')" id="nav-gratitude" class="nav-btn flex flex-col items-center gap-0.5 text-slate-400 text-xs"><span>💖</span><span id="nav-text-gratitude">الامتنان</span></button>
-    </nav>
-
     <script>
-        let appData = JSON.parse(localStorage.getItem('lifeManagerData')) || {
-            todos: [], goals: [], habits: {}, gratitude: [], currency: 'د.ج', totalSavings: 0, budgetBalance: 0, currentLang: 'ar'
-        };
-
-        let currentDate = new Date();
-        let chartInstance = null;
-
-        const translations = {
+        const langData = {
             ar: {
-                headerTag: "خُطط لحياتك بشكل احترافي", headerTitle: "مُنظم الحياة الذكي", headerSubtitle: "رؤيتك ▪ أهدافك ▪ خططك كلها في مكان واحد",
-                menuTodo: "المهام", menuGoals: "الأهداف", menuHabits: "العادات", menuSavings: "المدخرات والمنحنى", menuCalendar: "التقويم والمواعيد", menuGratitude: "الامتنان",
-                titleTodo: "قائمة مهام اليوم", placeholderTodo: "أضف مهمة جديدة...", titleGoals: "الأهداف والخطط", placeholderGoals: "أضف هدفاً جديداً...",
-                titleHabits: "بناء وتتبع العادات", placeholderHabits: "مثال: القراءة، شرب الماء...", titleSavings: "المدخرات والميزانية الذكية",
-                labelSaved: "المبلغ المدخر", labelSpent: "المتبقي للمصاريف", inputMoney: "المبلغ الإجمالي الكلي:", inputSave: "نسبة الادخار (%):", inputSpend: "نسبة المصاريف (%):",
-                btnCalc: "احسب الميزانية والادخار", titleGratitude: "مذكرات الامتنان والبهجة", placeholderGratitude: "ما الشيء الجميل الذي أسعدك اليوم؟",
-                navTodo: "المهام", navGoals: "الأهداف", navHabits: "العادات", navSavings: "الميزانية", navCalendar: "التقويم", navGratitude: "الامتنان",
-                months: ["جوانفي", "فيفري", "مارس", "أفريل", "ماي", "جوان", "جويلية", "أوت", "سبتمبر", "أكتوبر", "نوفمبر", "ديسمبر"],
-                weekdays: ["السبت", "الأحد", "الاثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة"]
+                toggleBtn: "English 🌐", subtitleBadge: "خُطط لحياتك بشكل احترافي 🎯", mainTitle: "مُدير الحياة ", desc: "رؤيتك • أهدافك • خطتك كلها في مكان واحد",
+                tabTodo: "المهام", tabGoals: "الأهداف", tabHabits: "العادات", tabSavings: "المدخرات والمنحنى", tabBalance: "الرصيد", tabCalendar: "التقويم والمواعيد", tabGratitude: "الامتنان",
+                todoTitle: "📋 قائمة المهام اليومية", todoPlaceholder: "أضيفي مهمة جديدة هنا...", todoAdd: "إضافة", visionTitle: "💡 خلية الرؤية (3 سنوات):", visionPlaceholder: "اكتبي رؤيتك لـ 3 سنوات هنا...",
+                goalsHeader: "أهداف 12 شهر — لعام 2026 🗓️", goalTitlePlh: "الهدف (ماذا؟)", goalHowPlh: "روك (كيف؟)", goalAdd: "+ إضافة الهدف", thType: "النوع", thGoal: "الهدف", thHow: "كيف؟", thStatus: "الحالة", thAction: "إجراء", optEdu: "التعليم", optCareer: "المهنة", optFinance: "المالية",
+                habitsTitle: "🔄 متتبع الإنجاز اليومي للعادات", habitPlh: "اكتبي العادة اليومية الجديدة هنا...", habitAdd: "أضف عادة", thHabName: "العادة اليومية", thHabDel: "حذف", dSat: "السبت", dSun: "الأحد", dMon: "الاثنين", dTue: "الثلاثاء", dWed: "الأربعاء", dThu: "الخميس", dFri: "الجمعة",
+                savingsHeader: "تحديث ميزانية الشهر الحالي 💰", lblInc: "الراتب / الدخل:", lblSav: "المدخرات المحققة:", lblInv: "الاستثمار:", lblTotSaved: "إجمالي التوفير والاستثمار", lblSavRatio: "نسبة الادخار من الدخل", chartTitle: "📊 منحنى تقدم المدخرات والاستثمار التلقائي",
+                balHeader: "تتبع أرصدة الحسابات الأسبوعية 💳", lblCash: "المبلغ الكاش:", lblBank: "الحساب البنكي:", lblOth: "مبالغ أخرى:", lblTotBal: "💰 إجمالي الرصيد",
+                calMonths: ["يناير", "فبراير", "مارس", "أبريل", "مايو", "يونيو", "يوليو", "أغسطس", "سبتمبر", "أكتوبر", "نوفمبر", "ديسمبر"], calDays: ["السبت", "الأحد", "الاثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة"],
+                modalTitle: "تعديل المواعيد ليوم: ", modalPlh: "اكتبي الموعد أو الحدث اليومي الخاص بكِ هنا...", btnCalCancel: "إلغاء", btnCalSave: "حفظ الموعد", gratTitle: "🙏 اكتبِ مَشاعرك الإيجابية لهذا الأسبوع", gratPlh: "ما الشيء الجميل الذي حدث معك اليوم؟", gratAdd: "تسجيل"
             },
             en: {
-                headerTag: "Plan your life professionally", headerTitle: "Life Manager", headerSubtitle: "Your vision, goals, and plans all in one place",
-                menuTodo: "To-Do List", menuGoals: "Goals", menuHabits: "Habits", menuSavings: "Budget & Chart", menuCalendar: "Calendar & Schedule", menuGratitude: "Gratitude",
-                titleTodo: "Today's To-Do List", placeholderTodo: "Add a new task...", titleGoals: "Goals & Plans", placeholderGoals: "Add a new goal...",
-                titleHabits: "Habit Tracker", placeholderHabits: "e.g., Reading, Water...", titleSavings: "Savings & Smart Budget",
-                labelSaved: "Saved Amount", labelSpent: "Remaining for Expenses", inputMoney: "Total Amount:", inputSave: "Savings Percent (%):", inputSpend: "Expenses Percent (%):",
-                btnCalc: "Calculate Budget", titleGratitude: "Gratitude & Joy Journal", placeholderGratitude: "What beautiful thing made you happy today?",
-                navTodo: "Tasks", navGoals: "Goals", navHabits: "Habits", navSavings: "Budget", navCalendar: "Calendar", navGratitude: "Gratitude",
-                months: ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"],
-                weekdays: ["Sat", "Sun", "Mon", "Tue", "Wed", "Thu", "Fri"]
+                toggleBtn: "العربية 🌐", subtitleBadge: "Plan Your Life Professionally 🎯", mainTitle: "Life Manager ", desc: "Your Vision • Your Goals • Your Plans All in One Place",
+                tabTodo: "To-Do", tabGoals: "Goals", tabHabits: "Habits", tabSavings: "Savings & Chart", tabBalance: "Balance", tabCalendar: "Calendar & Events", tabGratitude: "Gratitude",
+                todoTitle: "📋 Daily To-Do List", todoPlaceholder: "Add a new task here...", todoAdd: "Add", visionTitle: "💡 Vision Cell (3 Years):", visionPlaceholder: "Write your 3-year vision here...",
+                goalsHeader: "12-Month Goals — For 2026 🗓️", goalTitlePlh: "Goal (What?)", goalHowPlh: "Action (How?)", goalAdd: "+ Add Goal", thType: "Type", thGoal: "Goal", thHow: "How?", thStatus: "Status", thAction: "Action", optEdu: "Education", optCareer: "Career", optFinance: "Finance",
+                habitsTitle: "🔄 Daily Habit Tracker", habitPlh: "Write your new daily habit here...", habitAdd: "Add Habit", thHabName: "Daily Habit", thHabDel: "Delete", dSat: "Sat", dSun: "Sun", dMon: "Mon", dTue: "Tue", dWed: "Wed", dThu: "Thu", dFri: "Fri",
+                savingsHeader: "Update This Month's Budget 💰", lblInc: "Salary / Income:", lblSav: "Saved Amount:", lblInv: "Investment:", lblTotSaved: "Total Savings & Investments", lblSavRatio: "Savings Ratio", chartTitle: "📊 Automated Savings Progress Chart",
+                balHeader: "Weekly Account Balances Tracking 💳", lblCash: "Cash Amount:", lblBank: "Bank Account:", lblOth: "Other Funds:", lblTotBal: "💰 Total Balance",
+                calMonths: ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"], calDays: ["Sat", "Sun", "Mon", "Tue", "Wed", "Thu", "Fri"],
+                modalTitle: "Edit events for: ", modalPlh: "Write your appointment or daily note here...", btnCalCancel: "Cancel", btnCalSave: "Save Event", gratTitle: "🙏 Log Your Positive Feelings For This Week", gratPlh: "What beautiful thing happened to you today?", gratAdd: "Save"
             }
         };
 
-        function initApp() {
-            if (!appData.currentLang) appData.currentLang = 'ar';
-            if (!appData.currency) appData.currency = 'د.ج';
-            document.getElementById('currency-select').value = appData.currency;
+        let currentLang = 'ar';
+        let appData = {
+            todo: [{ text: "ترتيب الجدول ومراجعة أهدافي للعام الجديد 📝", done: false }],
+            vision: "بحلول عام 2028، سأمتلك مشروعي الخاص، وسأحقق الاستقرار المالي.",
+            goals: [{ type: "التعليم / Education", title: "الحصول على معدل تراكمي ممتاز بنهاية العام", how: "تقدير ممتاز في جميع المقررات", status: "جاري 🔄" }],
+            habits: [{ title: "شرب 2 لتر ماء يومياً 💧", sat: true, sun: true, mon: false, tue: true, wed: false, thu: false, fri: false }],
+            savings: { salary: 10000, saved: 2200, invest: 200 },
+            balance: { cash: 12500, bank: 8500, other: 5000 },
+            gratitude: ["الحمد لله على كل النعم 🤍"],
+            events: { "2026-07-02": "Election Day 🗳️", "2026-07-05": "Independence 🎆" } 
+        };
+
+        const daysKeys = ['sat', 'sun', 'mon', 'tue', 'wed', 'thu', 'fri'];
+        let myChart = null;
+        let activeSelectedDate = '';
+
+        window.onload = function() {
+            if (localStorage.getItem('lifeManagerDataV4')) { appData = JSON.parse(localStorage.getItem('lifeManagerDataV4')); }
+            if(!appData.events) appData.events = {};
             
-            applyLanguage();
+            document.getElementById('vision-input').value = appData.vision || "";
+            document.getElementById('salary-input').value = appData.savings.salary;
+            document.getElementById('saved-input').value = appData.savings.saved;
+            document.getElementById('invest-input').value = appData.savings.invest;
+            document.getElementById('cash-input').value = appData.balance.cash;
+            document.getElementById('bank-input').value = appData.balance.bank;
+            document.getElementById('other-input').value = appData.balance.other;
+
+            const monthSelect = document.getElementById('cal-month');
+            monthSelect.innerHTML = '';
+            langData[currentLang].calMonths.forEach((m, idx) => {
+                let opt = document.createElement('option'); opt.value = idx; opt.className = "bg-slate-900";
+                if(idx === 6) opt.selected = true; 
+                opt.innerText = m; monthSelect.appendChild(opt);
+            });
+
+            applyLanguageUI();
+            renderTodos();
+            renderGoals();
+            renderHabits();
+            renderGratitude();
+            calculateSavings();
+            calculateTotalBalance();
+            initChart();
+            renderCalendar();
+        };
+
+        function toggleLanguage() {
+            currentLang = (currentLang === 'ar') ? 'en' : 'ar';
+            const htmlTag = document.getElementById('app-html');
+            htmlTag.setAttribute('lang', currentLang);
+            htmlTag.setAttribute('dir', currentLang === 'en' ? 'ltr' : 'rtl');
+            
+            const savedMonth = document.getElementById('cal-month').value;
+            const monthSelect = document.getElementById('cal-month');
+            monthSelect.innerHTML = '';
+            langData[currentLang].calMonths.forEach((m, idx) => {
+                let opt = document.createElement('option'); opt.value = idx; opt.className = "bg-slate-900";
+                if(idx == savedMonth) opt.selected = true;
+                opt.innerText = m; monthSelect.appendChild(opt);
+            });
+
+            applyLanguageUI();
             renderTodos();
             renderGoals();
             renderHabits();
             renderCalendar();
-            renderGratitude();
-            
-            document.getElementById('total-savings-num').innerText = appData.totalSavings || 0;
-            document.getElementById('budget-balance-num').innerText = appData.budgetBalance || 0;
-            updateChart(appData.totalSavings || 0, appData.budgetBalance || 0);
+            if(myChart) { myChart.destroy(); initChart(); }
         }
 
-        function saveData() { localStorage.setItem('lifeManagerData', JSON.stringify(appData)); }
-
-        function toggleLanguage() {
-            appData.currentLang = appData.currentLang === 'ar' ? 'en' : 'ar';
-            saveData();
-            applyLanguage();
-            renderCalendar();
+        function applyLanguageUI() {
+            const l = langData[currentLang];
+            document.getElementById('lang-toggle-btn').innerText = l.toggleBtn;
+            document.getElementById('txt-subtitle-badge').innerText = l.subtitleBadge;
+            document.getElementById('txt-main-title').innerHTML = `${l.mainTitle} <span class="text-purple-300">v3.0</span>`;
+            document.getElementById('txt-desc').innerText = l.desc;
+            document.getElementById('lbl-tab-todo').innerText = l.tabTodo;
+            document.getElementById('lbl-tab-goals').innerText = l.tabGoals;
+            document.getElementById('lbl-tab-habits').innerText = l.tabHabits;
+            document.getElementById('lbl-tab-savings').innerText = l.tabSavings;
+            document.getElementById('lbl-tab-balance').innerText = l.tabBalance;
+            document.getElementById('lbl-tab-calendar').innerText = l.tabCalendar;
+            document.getElementById('lbl-tab-gratitude').innerText = l.tabGratitude;
+            document.getElementById('txt-todo-title').innerText = l.todoTitle;
+            document.getElementById('todo-input').placeholder = l.todoPlaceholder;
+            document.getElementById('btn-todo-add').innerText = l.todoAdd;
+            document.getElementById('txt-vision-title').innerText = l.visionTitle;
+            document.getElementById('vision-input').placeholder = l.visionPlaceholder;
+            document.getElementById('txt-goals-header').innerText = l.goalsHeader;
+            document.getElementById('goal-title').placeholder = l.goalTitlePlh;
+            document.getElementById('goal-how').placeholder = l.goalHowPlh;
+            document.getElementById('btn-goal-add').innerText = l.goalAdd;
+            document.getElementById('th-type').innerText = l.thType;
+            document.getElementById('th-goal').innerText = l.thGoal;
+            document.getElementById('th-how').innerText = l.thHow;
+            document.getElementById('th-status').innerText = l.thStatus;
+            document.getElementById('th-action').innerText = l.thAction;
+            document.getElementById('txt-habits-title').innerText = l.habitsTitle;
+            document.getElementById('habit-title').placeholder = l.habitPlh;
+            document.getElementById('btn-habit-add').innerText = l.habitAdd;
+            document.getElementById('th-habit-name').innerText = l.thHabName;
+            document.getElementById('th-habit-del').innerText = l.thHabDel;
+            document.getElementById('d-sat').innerText = l.dSat; document.getElementById('d-sun').innerText = l.dSun;
+            document.getElementById('d-mon').innerText = l.dMon; document.getElementById('d-tue').innerText = l.dTue;
+            document.getElementById('d-wed').innerText = l.dWed; document.getElementById('d-thu').innerText = l.dThu;
+            document.getElementById('d-fri').innerText = l.dFri;
+            document.getElementById('txt-savings-header').innerText = l.savingsHeader;
+            document.getElementById('lbl-inc').innerText = l.lblInc;
+            document.getElementById('lbl-sav').innerText = l.lblSav;
+            document.getElementById('lbl-inv').innerText = l.lblInv;
+            document.getElementById('lbl-tot-saved').innerText = l.lblTotSaved;
+            document.getElementById('lbl-sav-ratio').innerText = l.lblSavRatio;
+            document.getElementById('txt-chart-title').innerText = l.chartTitle;
+            document.getElementById('txt-bal-header').innerText = l.balHeader;
+            document.getElementById('lbl-cash').innerText = l.lblCash;
+            document.getElementById('lbl-bank').innerText = l.lblBank;
+            document.getElementById('lbl-oth').innerText = l.lblOth;
+            document.getElementById('lbl-tot-bal').innerText = l.lblTotBal;
+            document.getElementById('btn-cal-cancel').innerText = l.btnCalCancel;
+            document.getElementById('btn-cal-save').innerText = l.btnCalSave;
+            document.getElementById('modal-date-text').placeholder = l.modalPlh;
+            document.getElementById('txt-grat-title').innerText = l.gratTitle;
+            document.getElementById('gratitude-input').placeholder = l.gratPlh;
+            document.getElementById('btn-grat-add').innerText = l.gratAdd;
         }
 
-        function applyLanguage() {
-            const lang = appData.currentLang;
-            const t = translations[lang];
+        function saveData() {
+            appData.vision = document.getElementById('vision-input').value;
+            appData.savings.salary = parseFloat(document.getElementById('salary-input').value) || 0;
+            appData.savings.saved = parseFloat(document.getElementById('saved-input').value) || 0;
+            appData.savings.invest = parseFloat(document.getElementById('invest-input').value) || 0;
+            appData.balance.cash = parseFloat(document.getElementById('cash-input').value) || 0;
+            appData.balance.bank = parseFloat(document.getElementById('bank-input').value) || 0;
+            appData.balance.other = parseFloat(document.getElementById('other-input').value) || 0;
             
-            document.getElementById('app-html').dir = lang === 'ar' ? 'rtl' : 'ltr';
-            document.getElementById('lang-btn-text').innerText = lang === 'ar' ? 'English' : 'العربية';
-            
-            document.getElementById('header-tag').innerText = t.headerTag;
-            document.getElementById('header-title').innerText = t.headerTitle;
-            document.getElementById('header-subtitle').innerText = t.headerSubtitle;
-            
-            document.getElementById('menu-todo').innerText = t.menuTodo;
-            document.getElementById('menu-goals').innerText = t.menuGoals;
-            document.getElementById('menu-habits').innerText = t.menuHabits;
-            document.getElementById('menu-savings').innerText = t.menuSavings;
-            document.getElementById('menu-calendar').innerText = t.menuCalendar;
-            document.getElementById('menu-gratitude').innerText = t.menuGratitude;
-            
-            document.getElementById('title-todo').innerText = t.titleTodo;
-            document.getElementById('todo-input').placeholder = t.placeholderTodo;
-            document.getElementById('title-goals').innerText = t.titleGoals;
-            document.getElementById('goal-input').placeholder = t.placeholderGoals;
-            document.getElementById('title-habits').innerText = t.titleHabits;
-            document.getElementById('habit-input').placeholder = t.placeholderHabits;
-            
-            document.getElementById('title-savings').innerText = t.titleSavings;
-            document.getElementById('label-saved').innerText = t.labelSaved;
-            document.getElementById('label-spent').innerText = t.labelSpent;
-            document.getElementById('input-money-label').innerText = t.inputMoney;
-            document.getElementById('input-save-label').innerText = t.inputSave;
-            document.getElementById('input-spend-label').innerText = t.inputSpend;
-            document.getElementById('btn-calc').innerText = t.btnCalc;
-            
-            document.getElementById('title-gratitude').innerText = t.titleGratitude;
-            document.getElementById('gratitude-input').placeholder = t.placeholderGratitude;
-            
-            document.getElementById('nav-text-todo').innerText = t.navTodo;
-            document.getElementById('nav-text-goals').innerText = t.navGoals;
-            document.getElementById('nav-text-habits').innerText = t.navHabits;
-            document.getElementById('nav-text-savings').innerText = t.navSavings;
-            document.getElementById('nav-text-calendar').innerText = t.navCalendar;
-            document.getElementById('nav-text-gratitude').innerText = t.navGratitude;
-            
-            updateCurrencyLabels();
-        }
-
-        function updateCurrency() {
-            appData.currency = document.getElementById('currency-select').value;
-            saveData();
-            updateCurrencyLabels();
-        }
-
-        function updateCurrencyLabels() {
-            document.querySelectorAll('.currency-label').forEach(el => { el.innerText = appData.currency; });
-        }
-
-        function calculateBudget() {
-            const amount = parseFloat(document.getElementById('savings-amount').value) || 0;
-            const sPercent = parseFloat(document.getElementById('savings-percent').value) || 0;
-            const ePercent = parseFloat(document.getElementById('expenses-percent').value) || 0;
-            if(amount > 0) {
-                appData.totalSavings = ((amount * sPercent) / 100).toFixed(2);
-                appData.budgetBalance = ((amount * ePercent) / 100).toFixed(2);
-                document.getElementById('total-savings-num').innerText = appData.totalSavings;
-                document.getElementById('budget-balance-num').innerText = appData.budgetBalance;
-                saveData();
-                updateChart(appData.totalSavings, appData.budgetBalance);
+            localStorage.setItem('lifeManagerDataV4', JSON.stringify(appData));
+            if(myChart) {
+                myChart.data.datasets[0].data = [appData.savings.salary, appData.savings.saved, appData.savings.invest];
+                myChart.update();
             }
         }
 
-        function updateChart(saved, spent) {
-            const ctx = document.getElementById('savingsChart').getContext('2d');
-            if (chartInstance) { chartInstance.destroy(); }
-            chartInstance = new Chart(ctx, {
-                type: 'doughnut',
-                data: {
-                    labels: appData.currentLang === 'ar' ? ['الادخار', 'المصاريف'] : ['Savings', 'Expenses'],
-                    datasets: [{
-                        data: [saved, spent],
-                        backgroundColor: ['#10b981', '#14b8a6'],
-                        borderWidth: 0
-                    }]
-                },
-                options: { plugins: { legend: { position: 'bottom', labels: { color: '#cbd5e1', font: { family: 'Cairo' } } } } }
-            });
-        }
-
-        function addTodo() {
-            const val = document.getElementById('todo-input').value.trim();
-            if(val) { appData.todos.push({text: val, done: false}); document.getElementById('todo-input').value=''; renderTodos(); saveData(); }
-        }
         function renderTodos() {
             const list = document.getElementById('todo-list'); list.innerHTML = '';
-            appData.todos.forEach((t, i) => {
+            appData.todo.forEach((item, index) => {
                 const li = document.createElement('li');
-                li.className = "flex justify-between items-center bg-slate-700/30 px-4 py-3 rounded-2xl border border-slate-700/50 text-sm";
-                li.innerHTML = `<span onclick="toggleTodo(${i})" class="cursor-pointer ${t.done ? 'line-through text-slate-500':''}">${t.text}</span><button onclick="deleteTodo(${i})" class="text-xs">🗑️</button>`;
+                li.className = `flex justify-between items-center p-3 rounded-xl border ${item.done ? 'bg-gray-50 line-through text-gray-400' : 'bg-white font-semibold'}`;
+                li.innerHTML = `<div class="flex items-center gap-3 cursor-pointer" onclick="toggleTodo(${index})"><input type="checkbox" ${item.done ? 'checked' : ''}><span>${item.text}</span></div><button onclick="deleteTodo(${index})" class="text-rose-500 text-xs">${currentLang==='ar'?'حذف':'Delete'}</button>`;
                 list.appendChild(li);
             });
         }
-        function toggleTodo(i) { appData.todos[i].done = !appData.todos[i].done; renderTodos(); saveData(); }
-        function deleteTodo(i) { appData.todos.splice(i, 1); renderTodos(); saveData(); }
-
-        function addGoal() {
-            const val = document.getElementById('goal-input').value.trim();
-            if(val) { appData.goals.push({text: val, done: false}); document.getElementById('goal-input').value=''; renderGoals(); saveData(); }
+        function addTodo() {
+            const input = document.getElementById('todo-input'); if(!input.value.trim()) return;
+            appData.todo.push({ text: input.value.trim(), done: false }); input.value = ''; saveData(); renderTodos();
         }
+        function toggleTodo(index) { appData.todo[index].done = !appData.todo[index].done; saveData(); renderTodos(); }
+        function deleteTodo(index) { appData.todo.splice(index, 1); saveData(); renderTodos(); }
+
         function renderGoals() {
-            const list = document.getElementById('goal-list'); list.innerHTML = '';
-            appData.goals.forEach((g, i) => {
-                const li = document.createElement('li');
-                li.className = "flex justify-between items-center bg-slate-700/30 px-4 py-3 rounded-2xl border border-slate-700/50 text-sm";
-                li.innerHTML = `<span onclick="toggleGoal(${i})" class="cursor-pointer ${g.done ? 'line-through text-slate-500':''}">${g.text}</span><button onclick="deleteGoal(${i})" class="text-xs">🗑️</button>`;
-                list.appendChild(li);
+            const tbody = document.getElementById('goals-table-body'); tbody.innerHTML = '';
+            appData.goals.forEach((goal, index) => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `<td class="p-4"><span class="bg-purple-100 text-purple-700 text-xs px-2 py-1 rounded font-bold">${goal.type}</span></td><td class="p-4 font-semibold">${goal.title}</td><td class="p-4 text-gray-500 text-xs">${goal.how}</td><td class="p-4"><select onchange="updateGoalStatus(${index}, this.value)" class="p-1 border text-xs rounded font-bold"><option value="جاري 🔄" ${goal.status === 'جاري 🔄' ? 'selected' : ''}>${currentLang==='ar'?'جاري':'Active'}</option><option value="مكتمل ✨" ${goal.status === 'مكتمل ✨' ? 'selected' : ''}>${currentLang==='ar'?'مكتمل':'Done'}</option></select></td><td class="p-4"><button onclick="deleteGoal(${index})" class="text-rose-600 text-xs">${currentLang==='ar'?'حذف':'Delete'}</button></td>`;
+                tbody.appendChild(tr);
             });
         }
-        function toggleGoal(i) { appData.goals[i].done = !appData.goals[i].done; renderGoals(); saveData(); }
-        function deleteGoal(i) { appData.goals.splice(i, 1); renderGoals(); saveData(); }
-
-        function addHabit() {
-            const val = document.getElementById('habit-input').value.trim();
-            if(val) { if(!appData.habits[val]) appData.habits[val] = []; document.getElementById('habit-input').value=''; renderHabits(); saveData(); }
+        function addGoal() {
+            const title = document.getElementById('goal-title').value; const how = document.getElementById('goal-how').value; const type = document.getElementById('goal-type').value;
+            if(!title) return; appData.goals.push({ type, title, how, status: "جاري 🔄" }); document.getElementById('goal-title').value=''; document.getElementById('goal-how').value=''; saveData(); renderGoals();
         }
+        function updateGoalStatus(index, val) { appData.goals[index].status = val; saveData(); }
+        function deleteGoal(index) { appData.goals.splice(index, 1); saveData(); renderGoals(); }
+
         function renderHabits() {
-            const list = document.getElementById('habit-list'); list.innerHTML = '';
-            for(let habit in appData.habits) {
-                const li = document.createElement('li');
-                li.className = "flex justify-between items-center bg-slate-700/30 px-4 py-3 rounded-2xl border border-slate-700/50 text-sm";
-                li.innerHTML = `<span>🌿 ${habit}</span><button onclick="deleteHabit('${habit}')" class="text-xs">🗑️</button>`;
-                list.appendChild(li);
-            }
+            const tbody = document.getElementById('habits-table-body'); tbody.innerHTML = '';
+            appData.habits.forEach((habit, index) => {
+                const tr = document.createElement('tr');
+                let daysHtml = daysKeys.map(day => `<td class="p-2"><button onclick="toggleHabitDay(${index}, '${day}')" class="w-8 h-8 rounded-full text-xs font-bold transition-all border ${habit[day] ? 'bg-emerald-500 text-white border-emerald-600' : 'bg-gray-100 text-gray-400'}">${habit[day] ? '✓' : '-'}</button></td>`).join('');
+                tr.innerHTML = `<td class="p-4 text-start font-semibold">${habit.title}</td>${daysHtml}<td class="p-4"><button onclick="deleteHabit(${index})" class="text-rose-500">🗑️</button></td>`;
+                tbody.appendChild(tr);
+            });
         }
-        function deleteHabit(habit) { delete appData.habits[habit]; renderHabits(); saveData(); }
+        function toggleHabitDay(idx, day) { appData.habits[idx][day] = !appData.habits[idx][day]; saveData(); renderHabits(); }
+        function addHabit() {
+            const title = document.getElementById('habit-title').value; if(!title.trim()) return;
+            appData.habits.push({ title: title.trim(), sat:false, sun:false, mon:false, tue:false, wed:false, thu:false, fri:false }); document.getElementById('habit-title').value=''; saveData(); renderHabits();
+        }
+        function deleteHabit(index) { appData.habits.splice(index, 1); saveData(); renderHabits(); }
 
-        function addGratitude() {
-            const val = document.getElementById('gratitude-input').value.trim();
-            if(val) { appData.gratitude.push(val); document.getElementById('gratitude-input').value=''; renderGratitude(); saveData(); }
+        function calculateSavings() {
+            saveData();
+            const total = appData.savings.saved + appData.savings.invest;
+            document.getElementById('total-saved-text').innerText = total.toLocaleString() + (currentLang==='ar'?" ر.س":" SAR");
+            const ratio = appData.savings.salary > 0 ? Math.round((total / appData.savings.salary) * 100) : 0;
+            document.getElementById('savings-ratio-text').innerText = ratio + "%";
         }
-        function renderGratitude() {
-            const list = document.getElementById('gratitude-list'); list.innerHTML = '';
-            appData.gratitude.forEach((g, i) => {
-                const li = document.createElement('li');
-                li.className = "bg-slate-700/30 p-3 rounded-2xl border border-slate-700/50 text-sm flex justify-between";
-                li.innerHTML = `<span>🙏 ${g}</span><button onclick="appData.gratitude.splice(${i},1);renderGratitude();saveData();" class="text-xs">🗑️</button>`;
-                list.appendChild(li);
+
+        // دالة تتبع الرصيد الأسبوعي الحسابي المضاف إليها معالجة العملات الجديدة المخصصة
+        function calculateTotalBalance() {
+            saveData();
+            const currency = document.getElementById('currency-select').value;
+            const total = appData.balance.cash + appData.balance.bank + appData.balance.other;
+            document.getElementById('total-balance-text').innerText = total.toLocaleString() + " " + currency;
+        }
+
+        function initChart() {
+            const ctx = document.getElementById('savingsChart').getContext('2d');
+            const lbls = (currentLang === 'ar') ? ['الراتب والدخل', 'المدخرات المحققة', 'الاستثمار الفعلي'] : ['Income', 'Savings', 'Investment'];
+            myChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: lbls,
+                    datasets: [{
+                        label: (currentLang==='ar')?'المبالغ بالعملة المحلية':'Amounts',
+                        data: [appData.savings.salary, appData.savings.saved, appData.savings.invest],
+                        backgroundColor: ['rgba(99, 102, 241, 0.4)', 'rgba(16, 185, 129, 0.4)', 'rgba(59, 130, 246, 0.4)'],
+                        borderColor: ['#6366f1', '#10b981', '#3bb9f6'],
+                        borderWidth: 2, borderRadius: 12
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, grid: { color: '#f3f4f6' } } } }
             });
         }
 
         function renderCalendar() {
-            const t = translations[appData.currentLang];
-            document.getElementById('calendar-month-year').innerText = `${t.months[currentDate.getMonth()]} ${currentDate.getFullYear()}`;
-            
-            const weekdaysContainer = document.getElementById('calendar-weekdays');
-            weekdaysContainer.innerHTML = t.weekdays.map(day => `<div>${day}</div>`).join('');
+            const year = parseInt(document.getElementById('cal-year').value);
+            const month = parseInt(document.getElementById('cal-month').value);
+            const headerRow = document.getElementById('calendar-days-header');
+            headerRow.innerHTML = '';
+            langData[currentLang].calDays.forEach(d => {
+                let div = document.createElement('div'); div.innerText = d; headerRow.appendChild(div);
+            });
 
-            const daysContainer = document.getElementById('calendar-days'); daysContainer.innerHTML = '';
-            const firstDay = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1).getDay();
-            const totalDays = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0).getDate();
+            const grid = document.getElementById('calendar-grid'); grid.innerHTML = '';
+            const firstDayIndex = new Date(year, month, 1).getDay(); 
+            const adjustedStart = (firstDayIndex + 1) % 7; 
             
-            const adjustedFirstDay = (firstDay + 1) % 7; 
-            for(let i=0; i<adjustedFirstDay; i++) { daysContainer.appendChild(document.createElement('div')); }
-            
-            for(let d=1; d<=totalDays; d++) {
-                const dayEl = document.createElement('div');
-                dayEl.className = "p-2 rounded-xl bg-slate-800 border border-slate-700/50 text-xs font-bold text-slate-300";
-                dayEl.innerText = d;
-                if(d === new Date().getDate() && currentDate.getMonth() === new Date().getMonth()) {
-                    dayEl.className += " ring-2 ring-purple-500 bg-purple-500/20 text-white";
+            const prevMonthDays = new Date(year, month, 0).getDate();
+            for (let i = adjustedStart - 1; i >= 0; i--) {
+                const dayNum = prevMonthDays - i;
+                const pDiv = document.createElement('div');
+                pDiv.className = "bg-slate-950/20 border border-slate-900/40 p-2 text-xs font-bold text-gray-700 text-center flex flex-col justify-start items-center rounded-lg opacity-40";
+                pDiv.innerHTML = `<span>${dayNum}</span>`; grid.appendChild(pDiv);
+            }
+
+            const numberOfDays = new Date(year, month + 1, 0).getDate();
+            for (let day = 1; day <= numberOfDays; day++) {
+                const dayStr = `${year}-${String(month+1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                const hasEvent = appData.events && appData.events[dayStr];
+                const isDay12 = (day === 12 && month === 6 && year === 2026);
+
+                const dayBtn = document.createElement('div');
+                dayBtn.className = `border border-slate-900 p-1.5 text-center flex flex-col justify-between items-center rounded-xl cursor-pointer transition-all hover:bg-slate-900 bg-slate-950 relative overflow-hidden`;
+                
+                let textClass = "text-sm font-bold text-gray-300";
+                let bgDaySpan = "";
+                
+                if (isDay12) {
+                    textClass = "text-sm font-bold text-slate-950 relative z-10";
+                    bgDaySpan = "absolute top-1.5 w-6 h-6 bg-sky-300 rounded-full z-0 flex items-center justify-center";
                 }
-                daysContainer.appendChild(dayEl);
+
+                let eventLabelHtml = "";
+                if(hasEvent) {
+                    eventLabelHtml = `<div class="w-full text-[10px] bg-teal-800/80 text-teal-100 font-medium py-0.5 px-1 rounded-md truncate text-center mt-1 max-w-[95%]">${appData.events[dayStr]}</div>`;
+                }
+
+                box_content = `
+                    <div class="relative w-full flex justify-center items-center h-7">
+                        ${bgDaySpan ? `<span class="${bgDaySpan}"><span class="${textClass}">${day}</span></span>` : `<span class="${textClass}">${day}</span>`}
+                    </div>
+                    ${eventLabelHtml}
+                `;
+                dayBtn.innerHTML = box_content;
+                dayBtn.onclick = () => openCalendarModal(dayStr);
+                grid.appendChild(dayBtn);
+            }
+
+            const totalCells = adjustedStart + numberOfDays;
+            const remaining = (7 - (totalCells % 7)) % 7;
+            for(let i=1; i<=remaining; i++) {
+                const nextDiv = document.createElement('div');
+                nextDiv.className = "bg-slate-950/20 border border-slate-900/40 p-2 text-xs font-bold text-gray-700 text-center flex flex-col justify-start items-center rounded-lg opacity-40";
+                nextDiv.innerHTML = `<span>${i}</span>`; grid.appendChild(nextDiv);
             }
         }
-        function prevMonth() { currentDate.setMonth(currentDate.getMonth() - 1); renderCalendar(); }
-        function nextMonth() { currentDate.setMonth(currentDate.getMonth() + 1); renderCalendar(); }
 
-        function switchTab(tabId) {
-            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-            document.getElementById(`tab-${tabId}`).classList.add('active');
-            
-            document.querySelectorAll('nav button').forEach(b => b.classList.remove('active', 'text-emerald-400', 'font-semibold'));
-            document.getElementById(`nav-${tabId}`).classList.add('active', 'text-emerald-400');
+        function openCalendarModal(dateStr) {
+            activeSelectedDate = dateStr;
+            const l = langData[currentLang];
+            document.getElementById('modal-date-title').innerText = `${l.modalTitle} ${dateStr}`;
+            document.getElementById('modal-date-text').value = appData.events[dateStr] || '';
+            document.getElementById('modal-calendar').classList.remove('hidden');
         }
 
-        window.onload = initApp;
+        function openCalendarModalWithActive() {
+            const year = document.getElementById('cal-year').value;
+            const month = parseInt(document.getElementById('cal-month').value) + 1;
+            const dStr = `${year}-${String(month).padStart(2, '0')}-12`;
+            openCalendarModal(dStr);
+        }
+
+        function closeCalendarModal() { document.getElementById('modal-calendar').classList.add('hidden'); }
+
+        function saveCalendarDay() {
+            const text = document.getElementById('modal-date-text').value.trim();
+            if(text) { appData.events[activeSelectedDate] = text; } else { delete appData.events[activeSelectedDate]; }
+            localStorage.setItem('lifeManagerDataV4', JSON.stringify(appData));
+            closeCalendarModal(); renderCalendar();
+        }
+
+        function renderGratitude() {
+            const list = document.getElementById('gratitude-list'); list.innerHTML = '';
+            appData.gratitude.forEach((item, index) => {
+                const li = document.createElement('li'); li.className = "flex justify-between items-center py-1 border-b text-sm";
+                li.innerHTML = `<span>${item}</span> <button onclick="deleteGratitude(${index})" class="text-xs text-gray-400">${currentLang==='ar'?'حذف':'Delete'}</button>`;
+                list.appendChild(li);
+            });
+        }
+        function addGratitude() {
+            const input = document.getElementById('gratitude-input'); if(!input.value.trim()) return;
+            appData.gratitude.push(input.value.trim()); input.value = ''; saveData(); renderGratitude();
+        }
+        function deleteGratitude(index) { appData.gratitude.splice(index, 1); saveData(); renderGratitude(); }
+
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.replace('block', 'hidden'));
+            document.getElementById('tab-' + tabId).classList.replace('hidden', 'block');
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.className = "tab-btn px-4 py-2 rounded-xl font-bold transition-all text-gray-600 hover:bg-gray-100");
+
+            const activeBtn = document.getElementById('btn-' + tabId);
+            if(tabId === 'todo') activeBtn.className = "tab-btn px-4 py-2 rounded-xl font-bold transition-all bg-indigo-600 text-white shadow-md";
+            if(tabId === 'goals') activeBtn.className = "tab-btn px-4 py-2 rounded-xl font-bold transition-all bg-purple-600 text-white shadow-md";
+            if(tabId === 'habits') activeBtn.className = "tab-btn px-4 py-2 rounded-xl font-bold transition-all bg-blue-600 text-white shadow-md";
+            if(tabId === 'savings') activeBtn.className = "tab-btn px-4 py-2 rounded-xl font-bold transition-all bg-emerald-600 text-white shadow-md";
+            if(tabId === 'balance') activeBtn.className = "tab-btn px-4 py-2 rounded-xl font-bold transition-all bg-slate-800 text-white shadow-md";
+            if(tabId === 'calendar') activeBtn.className = "tab-btn px-4 py-2 rounded-xl font-bold transition-all bg-indigo-950 text-white shadow-md";
+            if(tabId === 'gratitude') activeBtn.className = "tab-btn px-4 py-2 rounded-xl font-bold transition-all bg-fuchsia-600 text-white shadow-md";
+        }
     </script>
 </body>
 </html>
